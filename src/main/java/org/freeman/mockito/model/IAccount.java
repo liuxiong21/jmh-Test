@@ -1,12 +1,16 @@
 package org.freeman.mockito.model;
 
 public interface IAccount {
+	
+	String getId();
 
-	void setLoginedIn(boolean logined);
+	void setLoggedIn(boolean logined);
 	
 	boolean passwordMatches(String candidate);
 	
 	void setRevoked(boolean revoked);
 	
-	boolean isLoginedIn();
+	boolean isRevoked();
+	
+	boolean isLoggedIn();
 }

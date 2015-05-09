@@ -1,16 +1,13 @@
 package org.freeman.mockito.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.freeman.mockito.dao.IAccountRepository;
 import org.freeman.mockito.model.IAccount;
 
 public class LoginService {
 
 	private IAccountRepository repository;
-
-	private Map<String, Integer> loginFailStatisMap = new HashMap<>();
+	
+	private LoginServiceState state = new AwaitingFirstLoginAttempt();
 
 	public LoginService(IAccountRepository repository) {
 		this.repository = repository;
@@ -18,24 +15,13 @@ public class LoginService {
 
 	public void login(String accountId, String password) {
 		IAccount account = repository.find(accountId);
-		if (account.passwordMatches(password)) {
-			if (account.isLoginedIn()) {
-				throw new AccountLoginLimitReachedException();
-			}
-			account.setLoginedIn(true);
+		if(account==null){
+			throw new AccountNotFoundException();
 		}
-		else {
-			Integer counter = loginFailStatisMap.get(accountId);
-			if (counter == null) {
-				counter = 0;
-			}
-
-			counter++;
-			loginFailStatisMap.put(accountId, counter);
-			if (counter > 3) {
-				account.setRevoked(true);
-			}
-		}
+		state.login(this,account, password);
 	}
 
+	public void setState(LoginServiceState state){
+		this.state = state;
+	}
 }
